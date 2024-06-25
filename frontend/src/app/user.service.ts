@@ -15,28 +15,19 @@ interface User {
   permission: string[];
 }
 
-function matches(user: User, term: string) {
-  return (
-    user.firstName.toLowerCase().includes(term.toLowerCase()) ||
-    user.lastName.toLowerCase().includes(term.toLowerCase()) ||
-    user.email.toLowerCase().includes(term.toLowerCase())
-  );
-}
-
 @Injectable({
   providedIn: 'root',
 })
+
 export class UserService {
   private _filter = new FormControl('');
   private baseUrl = '/api/users';
 
   constructor(private http: HttpClient) { }
 
-  getTotalFilteredUsersCount(filterValue: string): number {
-    // Implement logic to get total count from API or service
-    // This could be asynchronous if needed
-    return 100; // Example placeholder
-  }
+  /* login(email: string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/api/users/login`, { email, password });
+  } */
 
   getAllUsers(): Observable<User[]> {
     return this.http.get<User[]>(`${this.baseUrl}`);

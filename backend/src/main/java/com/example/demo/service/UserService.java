@@ -21,14 +21,14 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public List<User> getUsersByRole(String role) {
+    /* public List<User> getUsersByRole(String role) {
         return userRepository.findByRole(role);
     }
 
     public User getUserById(String id) {
         Optional<User> optionalUser = userRepository.findById(id);
         return optionalUser.orElse(null); // Return null if user with given id is not found
-    }
+    } */
 
     public User save(User user) {
         return userRepository.save(user);
@@ -44,5 +44,13 @@ public class UserService {
 
     public void deleteUser(String id) {
         userRepository.deleteById(id);
+    }
+
+    public User authenticate(User user) {
+        User response = userRepository.findByEmail(user.getEmail());
+        if (response != null && response.getPassword().equals(user.getPassword())) {
+            return response; // Authentication successful
+        }
+        return null; // Authentication failed
     }
 }

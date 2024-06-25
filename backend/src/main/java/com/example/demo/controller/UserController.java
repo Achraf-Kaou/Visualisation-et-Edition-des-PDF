@@ -11,6 +11,7 @@ import com.example.demo.entity.User;
 import com.example.demo.service.UserService;
 
 
+
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
@@ -60,5 +61,15 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<User> login(@RequestBody User user) {
+        User response = userService.authenticate(user);
+        if (response != null) {
+            return ResponseEntity.ok(response); // Authentication successful, return user details
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Authentication failed
+        }
     }
 }
