@@ -6,17 +6,10 @@ import { Subject, debounceTime, tap } from 'rxjs';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { ReactiveFormsModule } from '@angular/forms'; // Import ReactiveFormsModule
 import { CommonModule } from '@angular/common';
+import { User } from '../../models/User';
+import { UserService } from '../../services/user.service';
 
 
-interface User {
-  id?: Object;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  permission: string[];
-}
 
 @Component({
   selector: 'add-user',
@@ -35,7 +28,7 @@ export class AddUserComponent {
   user!: User;
   showPassword!: boolean;
 
-  constructor(private modalService: NgbModal, private http: HttpClient, private formBuilder: FormBuilder) {
+  constructor(private modalService: NgbModal, private http: HttpClient, private userService: UserService) {
     this._message$
 			.pipe(
 				takeUntilDestroyed(),
@@ -107,6 +100,7 @@ export class AddUserComponent {
     if (this.addUserForm.invalid) {
       return;
     }
+    
     const user: User = {
       firstName: this.addUserForm.get('firstName')?.value ,
       lastName: this.addUserForm.get('lastName')?.value,
@@ -131,11 +125,7 @@ export class AddUserComponent {
       }).filter(permission => permission!== ''),
     };
     
-    this.http.post('http://localhost:8080/api/users', user, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    })
+    this.userService.addUser(user)
     .subscribe(
       (response: any) => {
         console.log(response =! undefined)

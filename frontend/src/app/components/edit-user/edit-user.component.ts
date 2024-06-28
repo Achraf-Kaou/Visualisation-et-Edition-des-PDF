@@ -1,22 +1,14 @@
 import { Component, Input, OnInit, TemplateRef, ViewChild } from '@angular/core';
 import { NgbAlert, NgbModal, NgbModalModule } from '@ng-bootstrap/ng-bootstrap';
-import { UserService } from '../../user.service';
+import { UserService } from '../../services/user.service';
 import { Observable, Subject, debounceTime, tap } from 'rxjs';
 import { FormArray, FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { CommonModule } from '@angular/common';
 import { HttpClientJsonpModule } from '@angular/common/http';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { User } from '../../models/User';
 
-interface User {
-  id?: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  permission: string[];
-}
 
 @Component({
   selector: 'edit-user',
@@ -34,7 +26,7 @@ export class EditUserComponent implements OnInit {
   showPassword!: boolean;
 
 
-  constructor(private fb: FormBuilder, private modalService: NgbModal, private http: HttpClient) {
+  constructor(private userService: UserService, private modalService: NgbModal, private http: HttpClient) {
     this._message$
       .pipe(
         takeUntilDestroyed(),
@@ -136,11 +128,7 @@ export class EditUserComponent implements OnInit {
         }
       }).filter(permission => permission !== ''),
     };
-    this.http.put(`http://localhost:8080/api/users/${this.user.id}`, user, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    })
+    this.userService.editUser(this.user.id, user)
       .subscribe(
         (response: any) => {
           console.log(response !== undefined)

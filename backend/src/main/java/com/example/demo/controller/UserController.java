@@ -8,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.demo.entity.User;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.UserService;
 
 
@@ -17,9 +18,11 @@ import com.example.demo.service.UserService;
 public class UserController {
 
     private final UserService userService;
+    private final UserRepository userRepository;
     @Autowired
-    public UserController(UserService userService) {
+    public UserController(UserService userService, UserRepository userRepository ) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @GetMapping
@@ -71,5 +74,10 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build(); // Authentication failed
         }
+    }
+
+    @GetMapping("/count")
+    public long getUserCount() {
+        return userRepository.count();
     }
 }

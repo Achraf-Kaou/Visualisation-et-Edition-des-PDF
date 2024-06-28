@@ -14,5 +14,6 @@ public interface UserRepository extends MongoRepository<User, String> {
     // Or use a custom method to query by full name
     List<User> findByFullName(String fullName);
     User findByEmail(String email);
+    long count();
 
 }

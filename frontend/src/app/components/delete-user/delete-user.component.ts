@@ -6,15 +6,8 @@ import { debounceTime, tap } from 'rxjs/operators';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-interface User {
-  id?: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  role: string;
-  permission: string[];
-}
+import { User } from '../../models/User';
+import { UserService } from '../../services/user.service';
 
 @Component({
     selector: 'delete-user',
@@ -30,7 +23,7 @@ export class DeleteUserComponent implements OnInit {
   successMessage = '';
   @ViewChild('selfClosingAlert', { static: false }) selfClosingAlert: NgbAlert | undefined;
   
-  constructor(private fb: FormBuilder, private modalService: NgbModal, private http: HttpClient) {
+  constructor(private fb: FormBuilder, private modalService: NgbModal, private http: HttpClient, private userService: UserService,) {
     this.deleteUserForm = this.fb.group({
       firstName: [''],
       lastName: [''],
@@ -47,6 +40,14 @@ export class DeleteUserComponent implements OnInit {
   }
 
   ngOnInit() {
+    if (typeof localStorage !== 'undefined') {
+      if (localStorage.getItem('userDeleted') === 'true') {
+        this._message$.next(`User deleted successfully.`);
+        localStorage.removeItem('userDeleted');
+      }
+    } else {
+      console.warn('localStorage is not available. This might occur in SSR or testing.');
+    }
     if (this.user) {
       this.deleteUserForm.patchValue(this.user);
     }
@@ -59,33 +60,27 @@ export class DeleteUserComponent implements OnInit {
   }
 
   public onSubmit(modal: any) {
-    this.http.delete(`http://localhost:8080/api/users/${this.user.id}`, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    })
+    this.userService.deleteUser(this.user.id)
     .subscribe(
       (response: any) => {
-        console.log(response =! undefined)
-        if (response ==! undefined) {
-          this._message$.next(`User deletetd successfully.`);
+        console.log(response !== undefined); // Use !== for strict inequality comparison
+        if (response !== undefined) {
           modal.close('Save click');
+            localStorage.setItem('userDeleted', 'true');
+            window.location.reload();
         }
       },
       (error: any) => {
         console.error(error);
         if (error.status === 400) {
           this._message$.next(`Bad request: ${error.error}`);
-          modal.close('Save click');
         } else if (error.status === 500) {
           this._message$.next(`Internal server error: ${error.error}`);
-          modal.close('Save click');
         } else {
           this._message$.next(`Error deleting user: ${error.message}`);
-          modal.close('Save click');
         }
+        modal.close('Save click');
       }
     );
-	}
-
+  }
 }

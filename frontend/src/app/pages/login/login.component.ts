@@ -6,6 +6,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { NgbAlert, NgbAlertModule } from '@ng-bootstrap/ng-bootstrap';
 import { Subject, debounceTime, tap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { UserService } from '../../services/user.service';
 
 @Component({
   standalone: true,
@@ -20,7 +21,7 @@ export class LoginComponent {
   private _message$ = new Subject<string>();
   error = '';
 
-  constructor(private http: HttpClient, private router: Router) { 
+  constructor(private http: HttpClient, private userService: UserService, private router: Router) { 
     this._message$
 			.pipe(
 				takeUntilDestroyed(),
@@ -42,20 +43,14 @@ export class LoginComponent {
     if (this.loginForm.invalid) {
       return;
     }
-    const requestBody = {
-      email: this.loginForm.get('email')?.value,
-      password: this.loginForm.get('password')?.value,
-    };
 
-    this.http.post('http://localhost:8080/api/users/login', requestBody, {
-      headers: new HttpHeaders({
-        'Content-Type': 'application/json'
-      })
-    }).subscribe(
+    const email= this.loginForm.get('email')?.value;
+    const password= this.loginForm.get('password')?.value;
+    this.userService.login(email,password)
+    .subscribe(
       (response: any) => {
-        // Assuming you want to navigate on successful login
         if(response.role==="Admin"){
-          this.router.navigateByUrl('/usersList');  
+          this.router.navigateByUrl('/admin');  
         }else {
           this.router.navigateByUrl('/unauthorized');  
         }
